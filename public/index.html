@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthCarer Appointment System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        .card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 4px solid #4facfe;
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #4facfe;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s ease;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-cancel {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        }
+
+        .availability-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .time-slot {
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .time-slot.free {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .time-slot.free:hover {
+            background: #b8daff;
+            border-color: #7db3ff;
+        }
+
+        .time-slot.booked {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f1b0b7;
+            cursor: not-allowed;
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: 600;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f1b0b7;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+        }
+
+        .booking-form {
+            display: none;
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .booking-form.show {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .availability-grid {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            }
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #4facfe;
+        }
+
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 HealthCarer</h1>
+            <p>Book your appointments with ease</p>
+        </div>
+
+        <div class="main-content">
+            <div class="card">
+                <h2>📅 Check Availability</h2>
+                
+                <div class="form-group">
+                    <label for="carer-select">Select Carer:</label>
+                    <select id="carer-select">
+                        <option value="">All Carers</option>
+                        <option value="Carer1">Carer 1</option>
+                        <option value="Carer2">Carer 2</option>
+                        <option value="Carer3">Carer 3</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="date-select">Select Date:</label>
+                    <select id="date-select">
+                        <option value="">All Dates</option>
+                        <option value="20250725">January 25, 2025</option>
+                        <option value="20250726">January 26, 2025</option>
+                        <option value="20250727">January 27, 2025</option>
+                    </select>
+                </div>
+
+                <button class="btn" onclick="checkAvailability()">Check Availability</button>
+                <button class="btn" onclick="initializeSlots()">Initialize Time Slots</button>
+
+                <div id="status-message"></div>
+
+                <div class="stats" id="availability-stats" style="display: none;">
+                    <div class="stat-item">
+                        <div class="stat-number" id="total-slots">0</div>
+                        <div class="stat-label">Total Slots</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="free-slots">0</div>
+                        <div class="stat-label">Available</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="booked-slots">0</div>
+                        <div class="stat-label">Booked</div>
+                    </div>
+                </div>
+
+                <div id="availability-grid" class="availability-grid"></div>
+
+                <div id="booking-form" class="booking-form">
+                    <h3>📝 Book This Slot</h3>
+                    <input type="hidden" id="selected-carer">
+                    <input type="hidden" id="selected-date">
+                    <input type="hidden" id="selected-time">
+                    
+                    <div class="form-group">
+                        <label for="person-name">Your Name:</label>
+                        <input type="text" id="person-name" placeholder="Enter your full name">
+                    </div>
+                    
+                    <button class="btn" onclick="bookAppointment()">Confirm Booking</button>
+                    <button class="btn btn-cancel" onclick="cancelBookingForm()">Cancel</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>❌ Cancel Appointment</h2>
+                
+                <div class="form-group">
+                    <label for="cancel-carer">Carer:</label>
+                    <select id="cancel-carer">
+                        <option value="">Select Carer</option>
+                        <option value="Carer1">Carer 1</option>
+                        <option value="Carer2">Carer 2</option>
+                        <option value="Carer3">Carer 3</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="cancel-date">Date:</label>
+                    <select id="cancel-date">
+                        <option value="">Select Date</option>
+                        <option value="20250725">January 25, 2025</option>
+                        <option value="20250726">January 26, 2025</option>
+                        <option value="20250727">January 27, 2025</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="cancel-time">Time Slot:</label>
+                    <select id="cancel-time">
+                        <option value="">Select Time</option>
+                        <option value="0900">09:00 AM</option>
+                        <option value="0930">09:30 AM</option>
+                        <option value="1000">10:00 AM</option>
+                        <option value="1030">10:30 AM</option>
+                        <option value="1100">11:00 AM</option>
+                        <option value="1130">11:30 AM</option>
+                        <option value="1200">12:00 PM</option>
+                        <option value="1230">12:30 PM</option>
+                        <option value="1300">01:00 PM</option>
+                        <option value="1330">01:30 PM</option>
+                        <option value="1400">02:00 PM</option>
+                        <option value="1430">02:30 PM</option>
+                        <option value="1500">03:00 PM</option>
+                        <option value="1530">03:30 PM</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-cancel" onclick="cancelAppointment()">Cancel Appointment</button>
+
+                <div id="cancel-status"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000/api';
+
+        function showStatus(message, type = 'info', elementId = 'status-message') {
+            const statusDiv = document.getElementById(elementId);
+            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+            setTimeout(() => {
+                if (type !== 'error') {
+                    statusDiv.innerHTML = '';
+                }
+            }, 5000);
+        }
+
+        function formatTime(timeSlot) {
+            const hour = parseInt(timeSlot.substring(0, 2));
+            const minute = timeSlot.substring(2);
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            const displayHour = hour > 12 ? hour - 12 : (hour === 0 ? 12 : hour);
+            return `${displayHour}:${minute} ${ampm}`;
+        }
+
+        function formatDate(dateStr) {
+            const year = dateStr.substring(0, 4);
+            const month = dateStr.substring(4, 6);
+            const day = dateStr.substring(6, 8);
+            const date = new Date(year, month - 1, day);
+            return date.toLocaleDateString('en-US', { 
+                weekday: 'short', 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        }
+
+        async function initializeSlots() {
+            showStatus('Initializing time slots...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/initialize`, {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    showStatus('✅ Time slots initialized successfully!', 'success');
+                } else {
+                    showStatus(`❌ Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`❌ Network error: ${error.message}`, 'error');
+            }
+        }
+
+        async function checkAvailability() {
+            const carer = document.getElementById('carer-select').value;
+            const date = document.getElementById('date-select').value;
+            
+            showStatus('Loading availability...', 'info');
+            
+            try {
+                let url = `${API_BASE}/availability`;
+                const params = new URLSearchParams();
+                if (carer) params.append('carer_id', carer);
+                if (date) params.append('date', date);
+                if (params.toString()) url += '?' + params.toString();
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayAvailability(data.data);
+                    showStatus(`✅ Found ${data.data.length} time slots`, 'success');
+                } else {
+                    showStatus(`❌ Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`❌ Network error: ${error.message}`, 'error');
+            }
+        }
+
+        function displayAvailability(slots) {
+            const grid = document.getElementById('availability-grid');
+            const stats = document.getElementById('availability-stats');
+            
+            if (slots.length === 0) {
+                grid.innerHTML = '<p class="loading">No time slots found. Try initializing slots first.</p>';
+                stats.style.display = 'none';
+                return;
+            }
+
+            // Calculate statistics
+            const totalSlots = slots.length;
+            const freeSlots = slots.filter(slot => slot.availability === 'Free').length;
+            const bookedSlots = totalSlots - freeSlots;
+
+            document.getElementById('total-slots').textContent = totalSlots;
+            document.getElementById('free-slots').textContent = freeSlots;
+            document.getElementById('booked-slots').textContent = bookedSlots;
+            stats.style.display = 'flex';
+
+            // Group by date and carer for better display
+            const groupedSlots = {};
+            slots.forEach(slot => {
+                const key = `${slot.carer_id}_${slot.date}`;
+                if (!groupedSlots[key]) {
+                    groupedSlots[key] = [];
+                }
+                groupedSlots[key].push(slot);
+            });
+
+            let html = '';
+            Object.keys(groupedSlots).forEach(key => {
+                const [carerId, date] = key.split('_');
+                const slotsForGroup = groupedSlots[key];
+                
+                html += `
+                    <div style="grid-column: 1 / -1; margin: 20px 0 10px 0; padding: 10px; background: #f0f0f0; border-radius: 5px;">
+                        <strong>${carerId} - ${formatDate(date)}</strong>
+                    </div>
+                `;
+                
+                slotsForGroup.forEach(slot => {
+                    const isBooked = slot.availability === 'Booked';
+                    const statusClass = isBooked ? 'booked' : 'free';
+                    const displayText = isBooked ? 
+                        `${formatTime(slot.time_slot)}<br><small>Booked: ${slot.booking_person_name}</small>` : 
+                        formatTime(slot.time_slot);
+                    
+                    html += `
+                        <div class="time-slot ${statusClass}" 
+                             ${!isBooked ? `onclick="showBookingForm('${slot.carer_id}', '${slot.date}', '${slot.time_slot}')"` : ''}>
+                            ${displayText}
+                        </div>
+                    `;
+                });
+            });
+
+            grid.innerHTML = html;
+        }
+
+        function showBookingForm(carerId, date, timeSlot) {
+            document.getElementById('selected-carer').value = carerId;
+            document.getElementById('selected-date').value = date;
+            document.getElementById('selected-time').value = timeSlot;
+            
+            const form = document.getElementById('booking-form');
+            form.className = 'booking-form show';
+            
+            const displayInfo = `${carerId} - ${formatDate(date)} at ${formatTime(timeSlot)}`;
+            form.querySelector('h3').innerHTML = `📝 Book This Slot<br><small style="color: #666;">${displayInfo}</small>`;
+            
+            document.getElementById('person-name').focus();
+        }
+
+        function cancelBookingForm() {
+            document.getElementById('booking-form').className = 'booking-form';
+            document.getElementById('person-name').value = '';
+        }
+
+        async function bookAppointment() {
+            const carerId = document.getElementById('selected-carer').value;
+            const date = document.getElementById('selected-date').value;
+            const timeSlot = document.getElementById('selected-time').value;
+            const personName = document.getElementById('person-name').value.trim();
+            
+            if (!personName) {
+                showStatus('❌ Please enter your name', 'error');
+                return;
+            }
+            
+            showStatus('Booking appointment...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/book`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        carer_id: carerId,
+                        date: date,
+                        time_slot: timeSlot,
+                        person_name: personName
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showStatus('✅ Appointment booked successfully!', 'success');
+                    cancelBookingForm();
+                    checkAvailability(); // Refresh the display
+                } else {
+                    showStatus(`❌ Booking failed: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`❌ Network error: ${error.message}`, 'error');
+            }
+        }
+
+        async function cancelAppointment() {
+            const carerId = document.getElementById('cancel-carer').value;
+            const date = document.getElementById('cancel-date').value;
+            const timeSlot = document.getElementById('cancel-time').value;
+            
+            if (!carerId || !date || !timeSlot) {
+                showStatus('❌ Please fill in all fields', 'error', 'cancel-status');
+                return;
+            }
+            
+            showStatus('Cancelling appointment...', 'info', 'cancel-status');
+            
+            try {
+                const response = await fetch(`${API_BASE}/cancel`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        carer_id: carerId,
+                        date: date,
+                        time_slot: timeSlot
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showStatus('✅ Appointment cancelled successfully!', 'success', 'cancel-status');
+                    // Clear the form
+                    document.getElementById('cancel-carer').value = '';
+                    document.getElementById('cancel-date').value = '';
+                    document.getElementById('cancel-time').value = '';
+                    checkAvailability(); // Refresh the display
+                } else {
+                    showStatus(`❌ Cancellation failed: ${data.message}`, 'error', 'cancel-status');
+                }
+            } catch (error) {
+                showStatus(`❌ Network error: ${error.message}`, 'error', 'cancel-status');
+            }
+        }
+
+        // Initialize the page
+        window.onload = function() {
+            showStatus('Welcome! Initialize time slots first, then check availability.', 'info');
+        };
+    </script>
+</body>
+</html>
