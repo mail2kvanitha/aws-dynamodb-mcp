@@ -39,6 +39,12 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../../public/index.html'));
 });
 
+
+//voice
+app.get('/voice', (req, res) => {
+  res.sendFile(path.join(__dirname, '../../public/voice.html'));
+});
+
 // Get availability
 app.get('/api/availability', async (req, res) => {
   try {
