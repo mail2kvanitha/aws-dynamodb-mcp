@@ -17,8 +17,8 @@ export class HealthCarerDynamoDB {
   }
 
   async initializeTimeSlots(): Promise<void> {
-    const carers = ['Carer1', 'Carer2', 'Carer3'];
-    const dates = ['20250725', '20250726', '20250727'];
+    const carers = ['Doctor1', 'Doctor2', 'doctor3'];
+    const dates = ['20250728', '20250729', '20250730'];
     const timeSlots = this.generateTimeSlots();
 
     const promises = [];

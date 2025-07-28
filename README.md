@@ -675,6 +675,7 @@ class SimpleHealthCarerClient {
 ## Step 8: Setup Scripts and Build
 
 Update `package.json`:
+
 ```json
 {
   "name": "healthcarer-mcp",
@@ -706,6 +707,7 @@ Update `package.json`:
 ## Step 9: AWS Setup
 
 ### Create DynamoDB Table
+
 ```bash
 # Using AWS CLI
 aws dynamodb create-table \
@@ -721,6 +723,7 @@ aws dynamodb create-table \
 ```
 
 ### Set Environment Variables
+
 ```bash
 export AWS_REGION=us-east-1
 export AWS_ACCESS_KEY_ID=your_access_key
@@ -743,43 +746,60 @@ npm run client
 ## Usage Examples
 
 ### 1. Initialize Time Slots
+
 ```javascript
 await client.initializeTimeSlots();
 ```
 
 ### 2. Get All Availability
+
 ```javascript
 const availability = await client.getAvailability();
 ```
 
 ### 3. Get Specific Carer Availability
+
 ```javascript
 const carerAvailability = await client.getAvailability('Carer1');
 ```
 
 ### 4. Get Availability for Specific Date
+
 ```javascript
 const dateAvailability = await client.getAvailability(undefined, '20250725');
 ```
 
 ### 5. Book an Appointment
+
 ```javascript
 const result = await client.bookAppointment('Carer1', '20250725', '0900', 'John Doe');
 ```
 
 ### 6. Cancel an Appointment
+
 ```javascript
 const result = await client.cancelAppointment('Carer1', '20250725', '0900');
 ```
 
 ## Time Slot Format
+
 - **Dates**: YYYYMMDD format (e.g., "20250725")
 - **Time Slots**: HHMM format (e.g., "0900" for 9:00 AM, "1430" for 2:30 PM)
 - **Available Times**: 9:00 AM to 4:00 PM in 30-minute intervals
 
 ## Error Handling
+
 The system handles common scenarios:
+
 - Attempting to book an already booked slot
 - Cancelling a non-existent booking
 - Invalid carer IDs or time slots
 - AWS connectivity issues
+
+## To update Timeslots fresh
+
+- Modify below file
+    1. src/dynamodb-client.ts - Find the initializeTimeSlots() method and update the dates array
+    2. src/api-server.ts - Find the /api/dates endpoint and update it
+    3. public/index.html - Find the date select options and update them
+    4. public/voice.html - Update the quick commands section

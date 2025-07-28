@@ -158,7 +158,7 @@ class HealthCarerAPIServer {
     this.app.get('/api/carers', (req, res) => {
       res.json({
         success: true,
-        data: ['Carer1', 'Carer2', 'Carer3']
+        data: ['Doctorr1', 'Doctor2', 'Doctor3']
       });
     });
 
@@ -166,7 +166,7 @@ class HealthCarerAPIServer {
     this.app.get('/api/dates', (req, res) => {
       res.json({
         success: true,
-        data: ['20250725', '20250726', '20250727']
+        data: ['20250728', '20250729', '20250730']
       });
     });
 
